@@ -21,12 +21,10 @@ public class Main implements Runnable{
 
     @Override
     public void run() {
-        int characterCode =0;
         while (true) {
             try {
-                if ((characterCode = System.in.read()) == 'q') {
+                if (System.in.read() == 'q') {
                     System.out.println("break");
-
                     break;
                 }
             } catch (IOException e) {

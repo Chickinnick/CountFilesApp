@@ -9,16 +9,16 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 public class FileCounter implements Runnable {
+
     int sequenceNomber = 0;
     String sourceFile;
     String outputFile;
 
-    public FileCounter(String sourceFile,String outputFile) {
+    public FileCounter(String sourceFile, String outputFile) {
 
         this.sourceFile = sourceFile;
         this.outputFile = outputFile;
     }
-
 
 
     public Set<File> readFromFile(File file) {
@@ -60,11 +60,11 @@ public class FileCounter implements Runnable {
         for (File item : set) {
             Main.logger.log(Level.INFO, "search in" + item.getAbsolutePath() + " - START");
             results.add(countItems(item, new ResultOfCounting(item.getAbsolutePath())));
+            // results.add(new Thread(new CountThread(item, new ResultOfCounting(item.getAbsolutePath()))).start());
         }
 
         return results;
     }
-
     private ResultOfCounting countItems(File item, ResultOfCounting resultOfCounting) {
 
         for (File f : item.listFiles()) {
@@ -76,13 +76,38 @@ public class FileCounter implements Runnable {
         return resultOfCounting;
     }
 
+   /* class CountThread implements Runnable {
+        private ResultOfCounting countItems(File item, ResultOfCounting resultOfCounting) {
+
+            for (File f : item.listFiles()) {
+                resultOfCounting.incrementNumberOfFiles();
+
+                if (f.isDirectory())
+                    countItems(f, resultOfCounting);
+            }
+            return resultOfCounting;
+        }
+
+        File item;
+        ResultOfCounting resultOfCounting;
+
+        public CountThread(File item, ResultOfCounting resultOfCounting) {
+            this.item = item;
+            this.resultOfCounting = resultOfCounting;
+        }
+
+        @Override
+        public void run() {
+            countItems(item, resultOfCounting);
+        }
+    }*/
+
     public void displayResults(ResultOfCounting resultOfCounting) {
 
         Formatter formatter = new Formatter();
         System.out.println(formatter.format("|%5d|%5d|%40s|", ++sequenceNomber, resultOfCounting.getNumberOfFiles(), resultOfCounting.getDirectory()));
 
     }
-
 
 
     @Override
