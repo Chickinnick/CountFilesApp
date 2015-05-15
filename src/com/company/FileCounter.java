@@ -47,6 +47,7 @@ public class FileCounter {
             fileWriter = new FileWriter(new File(outputFile));
             for (ResultOfCounting item : resultsVector) {
                 fileWriter.write(item.toString() + "\n");
+
                 displayResults(item);
             }
         } catch (IOException e) {
@@ -63,7 +64,12 @@ public class FileCounter {
     public static void countAllElements(Set<File> set) {
 
         for (File item : set) {
-            new Thread(new CountThread(item, new ResultOfCounting(item.getAbsolutePath()))).start();
+            new Thread(new CountThread(item, new ResultOfCounting(item.getAbsolutePath())));
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             logger.log(Level.INFO, "thread created");
 
         }
@@ -80,7 +86,7 @@ public class FileCounter {
     }
 
 
-    static class CountThread implements Runnable {
+    static class CountThread extends Thread {
 
         File item;
         ResultOfCounting resultOfCounting;
@@ -88,6 +94,7 @@ public class FileCounter {
         public CountThread(File item, ResultOfCounting resultOfCounting) {
             this.item = item;
             this.resultOfCounting = resultOfCounting;
+            this.start();
             logger.log(Level.INFO, "new thread createrd {constructor}");
         }
 
@@ -108,7 +115,7 @@ public class FileCounter {
     @Override
     public void run() {
         resultsVector.add(countItems(item, resultOfCounting));
-        logger.log(Level.INFO, "1 thre");
+        logger.log(Level.INFO, Thread.currentThread().getName());
     }
 }
 }
