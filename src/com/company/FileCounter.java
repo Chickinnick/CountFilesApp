@@ -7,10 +7,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class FileCounter implements Runnable {
+public class FileCounter {
 
-    int sequenceNomber = 0;
+    public static final Logger logger = java.util.logging.Logger.getLogger("CounterLogger");
+
+    static Vector<ResultOfCounting> resultsVector = new Vector<>();
+    static int sequenceNomber = 0;
     String sourceFile;
     String outputFile;
 
@@ -21,9 +25,10 @@ public class FileCounter implements Runnable {
     }
 
 
-    public Set<File> readFromFile(File file) {
+    public static Set<File> readFromFile(File file) {
 
         Set<File> directories = new LinkedHashSet<>();
+
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
@@ -31,16 +36,16 @@ public class FileCounter implements Runnable {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            Main.logger.log(Level.WARNING, "Error while reading file");
+            logger.log(Level.WARNING, "Error while reading file");
         }
         return directories;
     }
 
-    public void writeToFile(Vector<ResultOfCounting> results, String outputFile) {
+    public static synchronized void writeToFile(String outputFile) {
         FileWriter fileWriter = null;
         try {
             fileWriter = new FileWriter(new File(outputFile));
-            for (ResultOfCounting item : results) {
+            for (ResultOfCounting item : resultsVector) {
                 fileWriter.write(item.toString() + "\n");
                 displayResults(item);
             }
@@ -55,54 +60,19 @@ public class FileCounter implements Runnable {
         }
     }
 
-    public Vector<ResultOfCounting> countAllElements(Set<File> set) {
-        Vector<ResultOfCounting> results = new Vector<>();
+    public static void countAllElements(Set<File> set) {
+
         for (File item : set) {
-            Main.logger.log(Level.INFO, "search in" + item.getAbsolutePath() + " - START");
-            results.add(countItems(item, new ResultOfCounting(item.getAbsolutePath())));
-            // results.add(new Thread(new CountThread(item, new ResultOfCounting(item.getAbsolutePath()))).start());
+            new Thread(new CountThread(item, new ResultOfCounting(item.getAbsolutePath()))).start();
+            logger.log(Level.INFO, "thread created");
+
         }
 
-        return results;
-    }
-    private ResultOfCounting countItems(File item, ResultOfCounting resultOfCounting) {
+        logger.log(Level.INFO, "end of count all");
 
-        for (File f : item.listFiles()) {
-            resultOfCounting.incrementNumberOfFiles();
-
-            if (f.isDirectory())
-                countItems(f, resultOfCounting);
-        }
-        return resultOfCounting;
     }
 
-   /* class CountThread implements Runnable {
-        private ResultOfCounting countItems(File item, ResultOfCounting resultOfCounting) {
-
-            for (File f : item.listFiles()) {
-                resultOfCounting.incrementNumberOfFiles();
-
-                if (f.isDirectory())
-                    countItems(f, resultOfCounting);
-            }
-            return resultOfCounting;
-        }
-
-        File item;
-        ResultOfCounting resultOfCounting;
-
-        public CountThread(File item, ResultOfCounting resultOfCounting) {
-            this.item = item;
-            this.resultOfCounting = resultOfCounting;
-        }
-
-        @Override
-        public void run() {
-            countItems(item, resultOfCounting);
-        }
-    }*/
-
-    public void displayResults(ResultOfCounting resultOfCounting) {
+    public static void displayResults(ResultOfCounting resultOfCounting) {
 
         Formatter formatter = new Formatter();
         System.out.println(formatter.format("|%5d|%5d|%40s|", ++sequenceNomber, resultOfCounting.getNumberOfFiles(), resultOfCounting.getDirectory()));
@@ -110,10 +80,35 @@ public class FileCounter implements Runnable {
     }
 
 
+    static class CountThread implements Runnable {
+
+        File item;
+        ResultOfCounting resultOfCounting;
+
+        public CountThread(File item, ResultOfCounting resultOfCounting) {
+            this.item = item;
+            this.resultOfCounting = resultOfCounting;
+            logger.log(Level.INFO, "new thread createrd {constructor}");
+        }
+
+
+        public ResultOfCounting countItems(File item, ResultOfCounting resultOfCounting) {
+
+
+            for (File f : item.listFiles()) {
+                resultOfCounting.incrementNumberOfFiles();
+                if (f.isDirectory())
+                    countItems(f, resultOfCounting);
+        }
+
+            return resultOfCounting;
+    }
+
+
     @Override
     public void run() {
-        Set<File> setOfDirs = readFromFile(new File(sourceFile));
-        Vector<ResultOfCounting> results = countAllElements(setOfDirs);
-        writeToFile(results, outputFile);
+        resultsVector.add(countItems(item, resultOfCounting));
+        logger.log(Level.INFO, "1 thre");
     }
+}
 }

@@ -1,6 +1,3 @@
-D:\Загрузки
-D:\Документы
+D:\IdeaProjects\CountFilesApp\src
 D:\IdeaProjects\CountFilesApp
-D:\Oracle
-D:\MATLAB R2009a Portable
-D:\JavaProgrammingEclipse
+D:\IdeaProjects\

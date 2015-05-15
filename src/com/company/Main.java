@@ -1,21 +1,25 @@
 package com.company;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.util.Set;
 
 public class Main implements Runnable{
 
-    public static final Logger logger = java.util.logging.Logger.getLogger("CounterLogger");
 
 
     public static void main(String[] args) {
 
-        new Thread(new Main()).start();
+
+//        new Thread(new Main()).start();
 
         String sourceFile = args[0];
         String outputFile = args[1];
 
-        new Thread(new FileCounter(sourceFile, outputFile)).start();
+
+        Set<File> setOfDirs = FileCounter.readFromFile(new File(sourceFile));
+        FileCounter.countAllElements(setOfDirs);
+        FileCounter.writeToFile(outputFile);
 
     }
 
