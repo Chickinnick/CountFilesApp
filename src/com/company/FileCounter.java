@@ -2,10 +2,7 @@ package com.company;
 
 
 import java.io.*;
-import java.util.Formatter;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +11,8 @@ public class FileCounter {
     public static final Logger logger = java.util.logging.Logger.getLogger("CounterLogger");
 
     static Vector<ResultOfCounting> resultsVector = new Vector<>();
+
+
     static int sequenceNomber = 0;
     String sourceFile;
     String outputFile;
@@ -61,6 +60,7 @@ public class FileCounter {
         }
     }
 
+
     public static void countAllElements(Set<File> set) {
 
         for (File item : set) {
@@ -70,12 +70,8 @@ public class FileCounter {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            logger.log(Level.INFO, "thread created");
-
         }
-
         logger.log(Level.INFO, "end of count all");
-
     }
 
     public static void displayResults(ResultOfCounting resultOfCounting) {
@@ -90,32 +86,28 @@ public class FileCounter {
 
         File item;
         ResultOfCounting resultOfCounting;
+        static List<CountThread> countThreads = new ArrayList<>();
 
         public CountThread(File item, ResultOfCounting resultOfCounting) {
             this.item = item;
             this.resultOfCounting = resultOfCounting;
+            countThreads.add(this);
             this.start();
             logger.log(Level.INFO, "new thread createrd {constructor}");
         }
 
-
         public ResultOfCounting countItems(File item, ResultOfCounting resultOfCounting) {
-
-
             for (File f : item.listFiles()) {
                 resultOfCounting.incrementNumberOfFiles();
                 if (f.isDirectory())
                     countItems(f, resultOfCounting);
         }
-
             return resultOfCounting;
     }
-
-
     @Override
     public void run() {
         resultsVector.add(countItems(item, resultOfCounting));
         logger.log(Level.INFO, Thread.currentThread().getName());
     }
-}
+    }
 }

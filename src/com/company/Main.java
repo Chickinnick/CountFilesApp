@@ -7,20 +7,19 @@ import java.util.Set;
 public class Main implements Runnable{
 
 
+    static Thread mythread = new Thread(new Main());
 
     public static void main(String[] args) {
 
 
-//        new Thread(new Main()).start();
+        mythread.start();
 
         String sourceFile = args[0];
         String outputFile = args[1];
 
-
         Set<File> setOfDirs = FileCounter.readFromFile(new File(sourceFile));
         FileCounter.countAllElements(setOfDirs);
         FileCounter.writeToFile(outputFile);
-
     }
 
     @Override
@@ -28,7 +27,9 @@ public class Main implements Runnable{
         while (true) {
             try {
                 if (System.in.read() == 'q') {
+                    mythread.interrupt();
                     System.out.println("break");
+
                     break;
                 }
             } catch (IOException e) {
